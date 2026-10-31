@@ -1,0 +1,5 @@
+glpi/.env
+glpi/storage/
+ad/log-atendimentos.csv
+inventario-*.csv
+inventario-*.html

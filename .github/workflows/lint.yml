@@ -1,0 +1,31 @@
+name: Validacao
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  powershell:
+    name: PSScriptAnalyzer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Analisar scripts PowerShell
+        shell: pwsh
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          $resultado = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error, Warning -ExcludeRule PSAvoidUsingWriteHost, PSUseSingularNouns, PSUseApprovedVerbs
+          $resultado | Format-Table -AutoSize
+          if ($resultado | Where-Object Severity -eq 'Error') { exit 1 }
+
+  compose:
+    name: Docker Compose do GLPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar docker-compose.yml
+        working-directory: glpi
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
